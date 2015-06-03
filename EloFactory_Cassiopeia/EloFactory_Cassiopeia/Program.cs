@@ -114,7 +114,6 @@ namespace EloFactory_Cassiopeia
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.UseECombo", "Use E in Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.UseRCombo", "Use R in Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.SwapHitChanceOnDashingChamp", "Swap Poison HitChance On Gapcloser Champions").SetValue(true));
-
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonOrder", "Poison Spell Order in Combo (Mode)").SetValue(new StringList(new[] { "Q Before W", "W Before Q" })));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonStack", "Poison Spell (Mode)").SetValue(new StringList(new[] { "Don't Poison On Poisoned", "Spam Poison" })));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonStack1VS1", "Spam Poison If There Is Only 1 Enemy").SetValue(true));
@@ -527,7 +526,7 @@ namespace EloFactory_Cassiopeia
                 }
             }
 
-            
+
         }
         #endregion
 
@@ -2798,7 +2797,7 @@ namespace EloFactory_Cassiopeia
         #region RLogic
         public static void RLogic()
         {
-            var target = TargetSelector.GetTarget(R.Range - 100, TargetSelector.DamageType.Magical);
+            var target = TargetSelector.GetTarget(500, TargetSelector.DamageType.Magical);
 
             if (Player.CountEnemiesInRange(1300) > 1)
             {
