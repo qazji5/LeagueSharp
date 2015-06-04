@@ -167,7 +167,15 @@ namespace EloFactory_Ryze
             Config.SubMenu("Drawings").AddItem(new MenuItem("WRange", "W range").SetValue(new Circle(true, Color.Green)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("RRange", "E range").SetValue(new Circle(true, Color.Green)));
             Config.SubMenu("Drawings").AddItem(new MenuItem("DrawOrbwalkTarget", "Draw Orbwalk target").SetValue(true));
-
+            Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDmg", "Draw Combo Damage On Enemy Healthbar").SetValue(true));
+            var DrawComboDmg = Config.SubMenu("Drawings").AddItem(new MenuItem("DrawDmg", "Draw Combo Damage On Enemy Healthbar").SetValue(true));
+            Utility.HpBarDamageIndicator.DamageToUnit = getComboDamage;
+            Utility.HpBarDamageIndicator.Enabled = Config.Item("DrawDmg").GetValue<bool>();
+            DrawComboDmg.ValueChanged += delegate(object sender, OnValueChangeEventArgs eventArgs)
+            {
+                Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
+            };
+            
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnGameUpdate;
@@ -727,6 +735,103 @@ namespace EloFactory_Ryze
 
             }
 
+        }
+        #endregion
+        
+                #region Player Damage
+        public static float getComboDamage(Obj_AI_Hero target)
+        {
+            float damage = 0f;
+            if (GetPassiveBuff == 0)
+            {
+                if (Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Mana >= QMANA)
+                {
+                    damage += Q.GetDamage(target);
+                    return damage;
+                }
+                if (W.IsReady() && !Q.IsReady() && !E.IsReady() && Player.Mana >= WMANA)
+                {
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (E.IsReady() && !Q.IsReady() && !W.IsReady() && Player.Mana >= EMANA)
+                {
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && W.IsReady() && !E.IsReady() && Player.Mana >= QMANA + WMANA)
+                {
+                    damage += Q.GetDamage(target);
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && E.IsReady() && !W.IsReady() && Player.Mana >= QMANA + EMANA)
+                {
+                    damage += Q.GetDamage(target);
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                if (W.IsReady() && E.IsReady() && !Q.IsReady() && Player.Mana >= QMANA + EMANA)
+                {
+                    damage += E.GetDamage(target);
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && W.IsReady() && E.IsReady() && Player.Mana >= QMANA + WMANA + EMANA)
+                {
+                    damage += Q.GetDamage(target);
+                    damage += W.GetDamage(target);
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                return damage;
+            }
+
+            if (GetPassiveBuff > 0)
+            {
+                if (Q.IsReady() && !W.IsReady() && !E.IsReady() && Player.Mana >= QMANA)
+                {
+                    damage += Q.GetDamage(target) * 2.5f;
+                    return damage;
+                }
+                if (W.IsReady() && !Q.IsReady() && !E.IsReady() && Player.Mana >= WMANA)
+                {
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (E.IsReady() && !Q.IsReady() && !W.IsReady() && Player.Mana >= EMANA)
+                {
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && W.IsReady() && !E.IsReady() && Player.Mana >= QMANA + WMANA)
+                {
+                    damage += Q.GetDamage(target) * 2.5f;
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && E.IsReady() && !W.IsReady() && Player.Mana >= QMANA + EMANA)
+                {
+                    damage += Q.GetDamage(target) * 2.5f;
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                if (W.IsReady() && E.IsReady() && !Q.IsReady() && Player.Mana >= QMANA + EMANA)
+                {
+                    damage += E.GetDamage(target);
+                    damage += W.GetDamage(target);
+                    return damage;
+                }
+                if (Q.IsReady() && W.IsReady() && E.IsReady() && Player.Mana >= QMANA + WMANA + EMANA)
+                {
+                    damage += Q.GetDamage(target) * 2.5f;
+                    damage += W.GetDamage(target);
+                    damage += E.GetDamage(target);
+                    return damage;
+                }
+                return damage;
+            }
+            return damage;
         }
         #endregion
 
