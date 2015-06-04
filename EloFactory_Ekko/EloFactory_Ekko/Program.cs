@@ -484,7 +484,7 @@ namespace EloFactory_Ekko
 
                 if (allMinionsQ.Any())
                 {
-                    var farmAll = W.GetCircularFarmLocation(allMinionsQ, 150);
+                    var farmAll = Q.GetCircularFarmLocation(allMinionsQ, 150);
                     if (farmAll.MinionsHit >= Config.Item("Ekko.QLaneClearCount").GetValue<Slider>().Value)
                     {
                         Q.Cast(farmAll.Position, true);
