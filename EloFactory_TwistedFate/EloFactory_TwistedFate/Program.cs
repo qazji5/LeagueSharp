@@ -437,10 +437,10 @@ namespace EloFactory_TwistedFate
                 #endregion
 
                 #region Sort W combo mode
-                if (useW && W.IsReady() && Player.Mana >= WMANA && ((Player.Distance(target) < 660 && target.IsMoving) || (Player.Distance(target) < 800) && !target.IsMoving && Player.MoveSpeed > target.MoveSpeed) || (Player.Distance(target) < 800 && target.IsFacing(Player)))
+                if (W.IsReady() && Player.Mana >= WMANA && ((Player.Distance(target) < 660 && target.IsMoving) || (Player.Distance(target) < 800) && !target.IsMoving && Player.MoveSpeed > target.MoveSpeed) || (Player.Distance(target) < 800 && target.IsFacing(Player)))
                 {
 
-
+                    if (!useW) return;
                     if (Environment.TickCount - CardTickCount < 250) return;
 
                     CardTickCount = Environment.TickCount;
