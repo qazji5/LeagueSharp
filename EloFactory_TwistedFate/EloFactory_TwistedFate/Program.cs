@@ -1,4 +1,4 @@
-﻿#region
+#region
 
 using System;
 using System.Collections.Generic;
@@ -40,6 +40,9 @@ namespace EloFactory_TwistedFate
 
         public static int CardTickCount;
         public static int RCardTickCount;
+        public static int ManualCardGoldTickCount;
+        public static int ManualCardRedTickCount;
+        public static int ManualCardBlueTickCount;
 
         public static Menu Config;
 
@@ -89,6 +92,13 @@ namespace EloFactory_TwistedFate
             Config.AddSubMenu(targetSelectorMenu);
 
             Orbwalker = new Orbwalking.Orbwalker(Config.SubMenu("Orbwalking"));
+
+            Config.AddSubMenu(new Menu("Manual Card Selector", "Manual Card Selector"));
+            Config.SubMenu("Manual Card Selector").AddItem(new MenuItem("TwistedFate.GoldCardActive", "Pick Gold Card!").SetValue(new KeyBind("W".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Manual Card Selector").AddItem(new MenuItem("TwistedFate.RedCardActive", "Pick Red Card!").SetValue(new KeyBind("E".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Manual Card Selector").AddItem(new MenuItem("TwistedFate.BlueCardActive", "Pick Blue Card!").SetValue(new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+            Config.SubMenu("Manual Card Selector").AddItem(new MenuItem("TwistedFate.MoveOnCursorWhenPickACardKey", "Move On Cursor When Pick A Card Key Press").SetValue(true));
+
             Config.AddSubMenu(new Menu("Combo", "Combo"));
             Config.SubMenu("Combo").AddSubMenu(new Menu("KS Mode", "KS Mode"));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("TwistedFate.UseIgniteKS", "KS With Ignite").SetValue(true));
@@ -100,7 +110,7 @@ namespace EloFactory_TwistedFate
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.UseWComboOption", "Card Choice For Combo").SetValue(new StringList(new[] { "Intelligent Card Usage", "Gold Card", "Red Card", "Blue Card" })));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.WMiniManaCombo", "Minimum Mana To Use W In Combo").SetValue(new Slider(15, 0, 100)));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.UseWBlueCombo", "Use W Blue Card When Percent Mana Under Mana To Use W In Combo").SetValue(true));
-            
+ 
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("TwistedFate.UseQHarass", "Use Q In Harass").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("TwistedFate.QMiniManaHarass", "Minimum Mana To Use Q In Harass").SetValue(new Slider(35, 0, 100)));
@@ -124,7 +134,7 @@ namespace EloFactory_TwistedFate
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.UseWLaneClear", "Use W In LaneClear").SetValue(true));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.UseWLaneClearOption", "Card Choice For LaneClear").SetValue(new StringList(new[] { "Red Card", "Blue Card" })));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.WMiniManaLaneClear", "Minimum Mana To Use W In LaneClear").SetValue(new Slider(35, 0, 100)));
-            Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.WMiniEnemyLaneClear", "Minimum Enemy In Range To Use Red Card In LaneClear").SetValue(new Slider(3, 2, 6)));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.WMiniEnemyLaneClear", "Minimum Minion In Range To Use Red Card In LaneClear").SetValue(new Slider(3, 2, 6)));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.UseWBlueLaneClear", "Use W Blue Card When Percent Mana Under Mana To Use W In LaneClear").SetValue(true));
 
             Config.AddSubMenu(new Menu("JungleClear", "JungleClear"));
@@ -176,6 +186,67 @@ namespace EloFactory_TwistedFate
             PotionManager();
 
             KillSteal();
+
+            #region Manual Card Picking
+                
+                if (Config.Item("TwistedFate.GoldCardActive").GetValue<KeyBind>().Active)
+                {
+                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
+                    {
+                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                    }
+
+                    if (Environment.TickCount - ManualCardGoldTickCount < 250) return;
+                    ManualCardGoldTickCount = Environment.TickCount;
+
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
+                    {
+                        W.Cast();
+                    }
+                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
+                    {
+                        W.Cast();
+                    }
+                }
+                if (Config.Item("TwistedFate.RedCardActive").GetValue<KeyBind>().Active)
+                {
+                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
+                    {
+                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                    }
+                    if (Environment.TickCount - ManualCardRedTickCount < 250) return;
+                    ManualCardRedTickCount = Environment.TickCount;
+
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
+                    {
+                        W.Cast();
+                    }
+                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                    {
+                        W.Cast();
+                    }
+                }
+                if (Config.Item("TwistedFate.BlueCardActive").GetValue<KeyBind>().Active)
+                {
+                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
+                    {
+                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                    }
+                    if (Environment.TickCount - ManualCardBlueTickCount < 250) return;
+                    ManualCardBlueTickCount = Environment.TickCount;
+
+                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
+                    {
+                        W.Cast();
+                    }
+                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
+                    {
+                        W.Cast();
+                    }
+                }
+            
+            
+            #endregion
 
             if (Config.Item("TwistedFate.AutoGoldCardOnR").GetValue<bool>())
             {
