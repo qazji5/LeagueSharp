@@ -970,14 +970,14 @@ namespace EloFactory_TwistedFate
         public static float getComboDamage(Obj_AI_Hero target)
         {
             float damage = 0f;
-            if (Config.Item("Cassiopeia.UseQCombo").GetValue<bool>())
+            if (Config.Item("TwistedFate.UseQCombo").GetValue<bool>())
             {
                 if (Player.Mana >= QMANA)
                 {
                     damage += Q.GetDamage(target) * 1.5f;
                 }
             }
-            if (Config.Item("Cassiopeia.UseWCombo").GetValue<bool>())
+            if (Config.Item("TwistedFate.UseWCombo").GetValue<bool>())
             {
                 if (Player.Mana >= QMANA + WMANA)
                 {
