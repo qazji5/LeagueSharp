@@ -44,6 +44,7 @@ namespace EloFactory_Ryze
         public static Items.Item ArchangelsStaffCrystalScar = new Items.Item(3007, 0);
         public static Items.Item Manamune = new Items.Item(3004, 0);
         public static Items.Item ManamuneCrystalScar = new Items.Item(3008, 0);
+        public static Items.Item SeraphsEmbrace = new Items.Item(3040, 0);
         public static int Muramana = 3042;
 
         public static Menu Config;
@@ -103,6 +104,8 @@ namespace EloFactory_Ryze
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseWCombo", "Use W In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseECombo", "Use E In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseRCombo", "Use R In Combo").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbrace", "Auto Seraph Usage").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbraceMiniHP", "Minimum HP To Use Auto Seraph").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoMuramana", "Auto Muramana Usage").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoMuramanaMiniMana", "Minimum Mana To Use Auto Muramana").SetValue(new Slider(10, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AA", "AA Usage In Combo").SetValue(new StringList(new[] { "Minimum AA", "Inteligent AA", "No AA" })));
@@ -180,6 +183,7 @@ namespace EloFactory_Ryze
 
             Game.OnUpdate += Game_OnGameUpdate;
             Drawing.OnDraw += Drawing_OnDraw;
+            Obj_AI_Base.OnProcessSpellCast += Obj_AI_Base_OnProcessSpellCast;
             AntiGapcloser.OnEnemyGapcloser += AntiGapcloser_OnEnemyGapcloser;
             Orbwalking.BeforeAttack += Orbwalking_BeforeAttack;
             CustomEvents.Unit.OnDash += Unit_OnDash;
@@ -262,6 +266,16 @@ namespace EloFactory_Ryze
 
         }
         #endregion
+        
+        #region OnProcessSpellCast
+        public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (Config.Item("Ryze.AutoSeraphsEmbrace").GetValue<bool>() && SeraphsEmbrace.IsReady() && Player.HealthPercent <= Config.Item("Ryze.AutoSeraphsEmbraceMiniHP").GetValue<Slider>().Value && (unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe)
+            {
+                SeraphsEmbrace.Cast();
+            }
+        }
+        #endregion        
 
         #region On Dash
         static void Unit_OnDash(Obj_AI_Base sender, Dash.DashItem args)
