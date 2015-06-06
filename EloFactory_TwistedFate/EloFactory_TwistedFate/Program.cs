@@ -136,6 +136,7 @@ namespace EloFactory_TwistedFate
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.WMiniManaLaneClear", "Minimum Mana To Use W In LaneClear").SetValue(new Slider(35, 0, 100)));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.WMiniEnemyLaneClear", "Minimum Minion In Range To Use Red Card In LaneClear").SetValue(new Slider(3, 2, 6)));
             Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.UseWBlueLaneClear", "Use W Blue Card When Percent Mana Under Mana To Use W In LaneClear").SetValue(true));
+            Config.SubMenu("LaneClear").AddItem(new MenuItem("TwistedFate.LaneClearActive", "LaneClear Key!").SetValue(new KeyBind("V".ToCharArray()[0], KeyBindType.Press)));
 
             Config.AddSubMenu(new Menu("JungleClear", "JungleClear"));
             Config.SubMenu("JungleClear").AddItem(new MenuItem("TwistedFate.UseQJungleClear", "Use Q In JungleClear").SetValue(true));
@@ -268,7 +269,7 @@ namespace EloFactory_TwistedFate
                 Combo();
             }
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear)
+            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LaneClear || Config.Item("TwistedFate.LaneClearActive").GetValue<KeyBind>().Active)
             {
                 Orbwalking.Attack = true;
                 JungleClear();
