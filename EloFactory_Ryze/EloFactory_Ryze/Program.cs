@@ -104,8 +104,8 @@ namespace EloFactory_Ryze
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseWCombo", "Use W In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseECombo", "Use E In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseRCombo", "Use R In Combo").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbrace", "Auto Seraph Usage").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbraceMiniHP", "Minimum HP To Use Auto Seraph").SetValue(new Slider(30, 0, 100)));
+            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbrace", "Auto Seraph's Embrace Usage").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoSeraphsEmbraceMiniHP", "Minimum HP To Use Auto Seraph's Embrace").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoMuramana", "Auto Muramana Usage").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AutoMuramanaMiniMana", "Minimum Mana To Use Auto Muramana").SetValue(new Slider(10, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.AA", "AA Usage In Combo").SetValue(new StringList(new[] { "Minimum AA", "Inteligent AA", "No AA" })));
