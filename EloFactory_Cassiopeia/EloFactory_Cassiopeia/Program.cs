@@ -52,6 +52,7 @@ namespace EloFactory_Cassiopeia
         public static Items.Item ArchangelsStaffCrystalScar = new Items.Item(3007, 0);
         public static Items.Item Manamune = new Items.Item(3004, 0);
         public static Items.Item ManamuneCrystalScar = new Items.Item(3008, 0);
+        public static Items.Item SeraphsEmbrace = new Items.Item(3040, 0);
 
         public static Menu Config;
 
@@ -113,7 +114,6 @@ namespace EloFactory_Cassiopeia
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.UseWCombo", "Use W in Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.UseECombo", "Use E in Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.UseRCombo", "Use R in Combo").SetValue(true));
-            Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.SwapHitChanceOnDashingChamp", "Swap Poison HitChance On Gapcloser Champions").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonOrder", "Poison Spell Order in Combo (Mode)").SetValue(new StringList(new[] { "Q Before W", "W Before Q" })));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonStack", "Poison Spell (Mode)").SetValue(new StringList(new[] { "Don't Poison On Poisoned", "Spam Poison" })));
             Config.SubMenu("Combo").AddItem(new MenuItem("Cassiopeia.PoisonStack1VS1", "Spam Poison If There Is Only 1 Enemy").SetValue(true));
@@ -210,6 +210,8 @@ namespace EloFactory_Cassiopeia
             Config.SubMenu("Misc").SubMenu("Tear Stacking Menu").AddItem(new MenuItem("Cassiopeia.StackTearInFountain", "Auto Use Q to Stack Tear In Fountain").SetValue(true));
             Config.SubMenu("Misc").SubMenu("Tear Stacking Menu").AddItem(new MenuItem("Cassiopeia.AutoQTear", "Auto Use Q To Stack Tear When Can Hit Enemy").SetValue(false));
             Config.SubMenu("Misc").SubMenu("Tear Stacking Menu").AddItem(new MenuItem("Cassiopeia.AutoQTearMinMana", "Minimum Mana to Stack Tear").SetValue(new Slider(90, 0, 100)));
+            Config.SubMenu("Misc").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbrace", "Auto Seraph Usage").SetValue(true));
+            Config.SubMenu("Misc").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbraceMiniHP", "Minimum HP To Use Auto Seraph").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Misc").AddItem(new MenuItem("Cassiopeia.AutoPotion", "Use Auto Potion").SetValue(true));
             Config.SubMenu("Misc").AddItem(new MenuItem("Cassiopeia.AutoLevelSpell", "Auto Level Spell").SetValue(true));
 
@@ -232,15 +234,12 @@ namespace EloFactory_Cassiopeia
 
         }
 
-        private static string[] GapCloserChampions = new string[] { "Ahri", "Gragas", "Graves", "Kalista", "Lucian", "RekSai", "Renekton", "Riven",
-            "Sejuani", "Tryndamere", "Vayne", "Vi", "Fizz", "Hecarim", "LeBlanc", "Nidalee", "Akali", "Diana", "Fiora", "Irelia", "Jax", "LeeSin",
-            "MasterYi", "Poppy", "Rengar", "MonkeyKing", "XinZhao", "Yasuo", "Zed", "JarvanIV", "Katarina", "Talon", "Ezreal", "Kassadin", "Gnar" };
-
         #region ToogleOrder Game_OnUpdate
         public static void Game_OnGameUpdate(EventArgs args)
         {
+            
             Player.SetSkin(Player.BaseSkinName, Config.Item("Cassiopeia.SkinChanger").GetValue<bool>() ? Config.Item("Cassiopeia.SkinChangerName").GetValue<StringList>().SelectedIndex : Player.BaseSkinId);
-
+            
             if (Config.Item("Cassiopeia.AutoLevelSpell").GetValue<bool>()) LevelUpSpells();
 
             if (Player.IsDead) return;
@@ -251,11 +250,14 @@ namespace EloFactory_Cassiopeia
             PotionManager();
 
             KillSteal();
-
+            
+            #region Auto Stack Tear In Fountain
             if (Config.Item("Cassiopeia.StackTearInFountain").GetValue<bool>() && Q.IsReady() && ObjectManager.Player.InFountain() && Player.ManaPercent >= Config.Item("Cassiopeia.AutoQTearMinMana").GetValue<Slider>().Value &&
                 (TearoftheGoddess.IsOwned(Player) || TearoftheGoddessCrystalScar.IsOwned(Player) || ArchangelsStaff.IsOwned(Player) || ArchangelsStaffCrystalScar.IsOwned(Player) || Manamune.IsOwned(Player) || ManamuneCrystalScar.IsOwned(Player)))
                 Q.Cast(ObjectManager.Player, true, true);
-
+            #endregion
+            
+            #region Auto W On Stunned Target
             if (Config.Item("Cassiopeia.AutoWOnStunTarget").GetValue<bool>())
             {
                 var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
@@ -264,7 +266,9 @@ namespace EloFactory_Cassiopeia
                     W.CastIfHitchanceEquals(target, HitChance.High, true);
                 }
             }
+            #endregion
 
+            #region Assisted R Key
             if (Config.Item("Cassiopeia.AssistedRKey").GetValue<KeyBind>().Active)
             {
                 if (Config.Item("Cassiopeia.MoveOnCursorWhenAssistedRKey").GetValue<bool>())
@@ -278,7 +282,8 @@ namespace EloFactory_Cassiopeia
                     AssistedR();
                 }
             }
-
+            #endregion
+            
             if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
             {
                 Combo();
@@ -296,7 +301,8 @@ namespace EloFactory_Cassiopeia
                 Orbwalking.Attack = true;
                 LastHit();
             }
-
+            
+            #region Auto Q Tear
             if (Config.Item("Cassiopeia.AutoQTear").GetValue<bool>() && Q.IsReady() && Player.ManaPercent >= Config.Item("Cassiopeia.AutoQTearMinMana").GetValue<Slider>().Value)
             {
                 if (TearoftheGoddess.IsOwned(Player) || TearoftheGoddessCrystalScar.IsOwned(Player) || ArchangelsStaff.IsOwned(Player) || ArchangelsStaffCrystalScar.IsOwned(Player) || Manamune.IsOwned(Player) || ManamuneCrystalScar.IsOwned(Player))
@@ -323,14 +329,15 @@ namespace EloFactory_Cassiopeia
 
                 }
             }
-
+            #endregion
+            
             if (Config.Item("Cassiopeia.HarassActive").GetValue<KeyBind>().Active || Config.Item("Cassiopeia.HarassActiveT").GetValue<KeyBind>().Active)
             {
                 Orbwalking.Attack = true;
                 Harass();
             }
-
-
+            
+            #region Auto E LastHit
             if ((!Config.Item("Cassiopeia.ToogleUseELastHitOption").GetValue<bool>() || (Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && Config.Item("Cassiopeia.ToogleUseELastHitOption").GetValue<bool>())) &&
                 Config.Item("Cassiopeia.ToogleUseELastHit").GetValue<bool>() && E.IsReady() && (Config.Item("Cassiopeia.ToogleUseELastHitMode").GetValue<StringList>().SelectedIndex == 1 || (Config.Item("Cassiopeia.ToogleUseELastHitMode").GetValue<StringList>().SelectedIndex != 1 && Player.CountEnemiesInRange(1500) == 0)))
             {
@@ -382,13 +389,19 @@ namespace EloFactory_Cassiopeia
                     }
 
             }
-
+            #endregion
+            
         }
         #endregion
 
         #region Interrupt OnProcessSpellCast
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
+
+            if (Config.Item("Cassiopeia.AutoSeraphsEmbrace").GetValue<bool>() && SeraphsEmbrace.IsReady() && Player.HealthPercent <= Config.Item("Cassiopeia.AutoSeraphsEmbraceMiniHP").GetValue<Slider>().Value && (unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe)
+            {
+                SeraphsEmbrace.Cast();
+            }
 
             double InterruptOn = SpellToInterrupt(args.SData.Name);
             if (Config.Item(unit.BaseSkinName + "INT").GetValue<bool>() && Config.Item("Cassiopeia.InterruptSpells").GetValue<bool>() && unit.Team != ObjectManager.Player.Team && InterruptOn >= 0f && unit.IsValidTarget(R.Range))
@@ -434,9 +447,11 @@ namespace EloFactory_Cassiopeia
             var useQ = Config.Item("Cassiopeia.UseQCombo").GetValue<bool>();
             var useW = Config.Item("Cassiopeia.UseWCombo").GetValue<bool>();
 
+            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+
             if (!sender.IsEnemy) return;
 
-            if (Player.CountEnemiesInRange(1200) == 1)
+            if (sender.NetworkId == target.NetworkId)
             {
                 if (useW && W.IsReady() && Player.Mana >= WMANA)
                 {
@@ -474,59 +489,6 @@ namespace EloFactory_Cassiopeia
                     }
                 }
             }
-
-            if (Player.CountEnemiesInRange(1200) > 1)
-            {
-                if (useW && W.IsReady() && Player.Mana >= WMANA)
-                {
-
-                    if (sender.BaseSkinName.Equals("LeBlanc", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        W.Cast(args.StartPos.Distance(Player) < W.Range ? args.StartPos : args.EndPos);
-                        lastCastW = Environment.TickCount;
-                        return;
-                    }
-
-                    if (sender.HasBuffOfType(BuffType.Poison) || Environment.TickCount - lastCastQ < 1000)
-                    {
-                        return;
-                    }
-
-                    var delay = (int)(args.EndTick - Game.Time - W.Delay - 0.1f);
-                    if (delay > 0)
-                    {
-                        Utility.DelayAction.Add(delay * 1000, () => W.Cast(args.EndPos));
-                        lastCastW = Environment.TickCount;
-                    }
-                    else
-                    {
-                        W.Cast(args.EndPos);
-                        lastCastW = Environment.TickCount;
-                    }
-                }
-
-                if (useQ && Q.IsReady() && Player.Mana >= QMANA)
-                {
-                    if (sender.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW < 1000 && sender.BaseSkinName != "LeBlanc"))
-                    {
-                        return;
-                    }
-
-                    var delay = (int)(args.EndTick - Game.Time - Q.Delay - 0.1f);
-                    if (delay > 0)
-                    {
-                        Utility.DelayAction.Add(delay * 1000, () => Q.Cast(args.EndPos));
-                        lastCastQ = Environment.TickCount;
-                    }
-                    else
-                    {
-                        Q.Cast(args.EndPos);
-                        lastCastQ = Environment.TickCount;
-                    }
-                }
-            }
-
-
         }
         #endregion
 
@@ -592,806 +554,402 @@ namespace EloFactory_Cassiopeia
                 }
                 #endregion
 
-                if (Config.Item("Cassiopeia.SwapHitChanceOnDashingChamp").GetValue<bool>() && GapCloserChampions.Contains(target.BaseSkinName))
+                if (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && !IsPoisoned(target) && (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Snare)))
                 {
-                    if (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && !IsPoisoned(target) && (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Snare)))
+
+                    switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
                     {
-
-                        switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
-                        {
-                            case 0:
-                                {
-                                    #region Sort E combo mode
-                                    if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
-                                    {
-                                        E.Cast(targetE, true);
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                            case 1:
-                                {
-
-                                    #region Sort E combo mode
-                                    if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
-                                    {
-                                        E.Cast(targetE, true);
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    if (useW && W.IsReady() && Player.Mana >= WMANA)
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                        }
-                    }
-                    if (!Config.Item("Cassiopeia.StartECombo").GetValue<bool>() || (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && ((!target.HasBuffOfType(BuffType.Stun) && !target.HasBuffOfType(BuffType.Knockup) && !target.HasBuffOfType(BuffType.Snare) || IsPoisoned(target)))))
-                    {
-                        #region Sort E combo mode
-                        if (useE && E.IsReady() && IsPoisoned(targetE) && Player.Mana >= EMANA && targetE.Distance(Player.Position) <= E.Range && !LegitE)
-                        {
-                            E.Cast(targetE, true);
-                        }
-                        #endregion
-
-                        #region Sort E combo mode LegitE
-                        if (useE && E.IsReady() && Player.Mana >= EMANA && LegitE)
-                        {
-                            if (targetE.Distance(Player.Position) <= 350 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo350").GetValue<Slider>().Value)
+                        case 0:
                             {
-                                if (IsPoisoned(targetE))
+                                #region Sort E combo mode
+                                if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
                                 {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
+                                    E.Cast(targetE, true);
                                 }
+                                #endregion
+
+                                #region Sort Q combo mode
+                                if (useQ && Q.IsReady() && Player.Mana >= QMANA)
+                                {
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+                                }
+                                #endregion
+
+                                #region Sort W combo mode
+                                else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
+                                {
+
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+
+
+                                }
+                                #endregion
+
+                                break;
                             }
 
-                            else if (targetE.Distance(Player.Position) <= 525 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo525").GetValue<Slider>().Value)
+                        case 1:
                             {
-                                if (IsPoisoned(targetE))
+
+                                #region Sort E combo mode
+                                if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
                                 {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
+                                    E.Cast(targetE, true);
                                 }
+                                #endregion
+
+                                #region Sort W combo mode
+                                if (useW && W.IsReady() && Player.Mana >= WMANA)
+                                {
+
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+
+                                }
+                                #endregion
+
+                                #region Sort Q combo mode
+                                if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
+                                {
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+                                }
+                                #endregion
+
+                                break;
                             }
 
-                            else if (targetE.Distance(Player.Position) <= E.Range && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayComboERange").GetValue<Slider>().Value)
-                            {
-                                if (IsPoisoned(targetE))
-                                {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
-                                }
-                            }
-
-
-                        }
-                        #endregion
-
-                        switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
-                        {
-                            case 0:
-                                {
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                            case 1:
-                                {
-
-                                    #region Sort W combo mode
-                                    if (useW && W.IsReady() && Player.Mana >= WMANA)
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogicVeryHigh();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                        }
                     }
                 }
-
-                if (!Config.Item("Cassiopeia.SwapHitChanceOnDashingChamp").GetValue<bool>() || !GapCloserChampions.Contains(target.BaseSkinName))
+                if (!Config.Item("Cassiopeia.StartECombo").GetValue<bool>() || (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && ((!target.HasBuffOfType(BuffType.Stun) && !target.HasBuffOfType(BuffType.Knockup) && !target.HasBuffOfType(BuffType.Snare) || IsPoisoned(target)))))
                 {
-                    if (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && !IsPoisoned(target) && (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Knockup) || target.HasBuffOfType(BuffType.Snare)))
+                    #region Sort E combo mode
+                    if (useE && E.IsReady() && IsPoisoned(targetE) && Player.Mana >= EMANA && targetE.Distance(Player.Position) <= E.Range && !LegitE)
                     {
-
-                        switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
-                        {
-                            case 0:
-                                {
-                                    #region Sort E combo mode
-                                    if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
-                                    {
-                                        E.Cast(targetE, true);
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                            case 1:
-                                {
-
-                                    #region Sort E combo mode
-                                    if (useE && E.IsReady() && ((useQ && Q.IsReady()) || (useW && W.IsReady())) && Player.Mana >= EMANA + QMANA + WMANA && targetE.Distance(Player.Position) <= E.Range && targetE.Distance(Player.Position) > E.Range - 100)
-                                    {
-                                        E.Cast(targetE, true);
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    if (useW && W.IsReady() && Player.Mana >= WMANA)
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                        }
+                        E.Cast(targetE, true);
                     }
-                    if (!Config.Item("Cassiopeia.StartECombo").GetValue<bool>() || (Config.Item("Cassiopeia.StartECombo").GetValue<bool>() && ((!target.HasBuffOfType(BuffType.Stun) && !target.HasBuffOfType(BuffType.Knockup) && !target.HasBuffOfType(BuffType.Snare) || IsPoisoned(target)))))
+                    #endregion
+
+                    #region Sort E combo mode LegitE
+                    if (useE && E.IsReady() && Player.Mana >= EMANA && LegitE)
                     {
-                        #region Sort E combo mode
-                        if (useE && E.IsReady() && IsPoisoned(targetE) && Player.Mana >= EMANA && targetE.Distance(Player.Position) <= E.Range && !LegitE)
+                        if (targetE.Distance(Player.Position) <= 350 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo350").GetValue<Slider>().Value)
                         {
-                            E.Cast(targetE, true);
-                        }
-                        #endregion
-
-                        #region Sort E combo mode LegitE
-                        if (useE && E.IsReady() && Player.Mana >= EMANA && LegitE)
-                        {
-                            if (targetE.Distance(Player.Position) <= 350 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo350").GetValue<Slider>().Value)
+                            if (IsPoisoned(targetE))
                             {
-                                if (IsPoisoned(targetE))
+                                E.CastOnUnit(targetE, true);
+                                lastCastE = Environment.TickCount;
+                                return;
+                            }
+                        }
+
+                        else if (targetE.Distance(Player.Position) <= 525 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo525").GetValue<Slider>().Value)
+                        {
+                            if (IsPoisoned(targetE))
+                            {
+                                E.CastOnUnit(targetE, true);
+                                lastCastE = Environment.TickCount;
+                                return;
+                            }
+                        }
+
+                        else if (targetE.Distance(Player.Position) <= E.Range && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayComboERange").GetValue<Slider>().Value)
+                        {
+                            if (IsPoisoned(targetE))
+                            {
+                                E.CastOnUnit(targetE, true);
+                                lastCastE = Environment.TickCount;
+                                return;
+                            }
+                        }
+
+
+                    }
+                    #endregion
+
+                    switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
+                    {
+                        case 0:
+                            {
+
+                                #region Sort Q combo mode
+                                if (useQ && Q.IsReady() && Player.Mana >= QMANA)
                                 {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
                                 }
+                                #endregion
+
+                                #region Sort W combo mode
+                                else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
+                                {
+
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+
+
+                                }
+                                #endregion
+
+                                break;
                             }
 
-                            else if (targetE.Distance(Player.Position) <= 525 && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayCombo525").GetValue<Slider>().Value)
+                        case 1:
                             {
-                                if (IsPoisoned(targetE))
+
+                                #region Sort W combo mode
+                                if (useW && W.IsReady() && Player.Mana >= WMANA)
                                 {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
+
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
+                                                {
+                                                    WLogic();
+                                                    lastCastW = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < W.Range)
+                                                {
+                                                    WLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+
                                 }
+                                #endregion
+
+                                #region Sort Q combo mode
+                                if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
+                                {
+                                    switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
+                                    {
+
+                                        case 0:
+                                            {
+                                                if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
+                                                {
+                                                    return;
+                                                }
+                                                else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
+                                                {
+                                                    QLogic();
+                                                    lastCastQ = Environment.TickCount;
+                                                }
+                                                break;
+                                            }
+                                        case 1:
+                                            {
+                                                if (Player.Distance(target) < Q.Range)
+                                                {
+                                                    QLogic();
+                                                }
+                                                break;
+                                            }
+                                    }
+                                }
+                                #endregion
+
+                                break;
                             }
 
-                            else if (targetE.Distance(Player.Position) <= E.Range && (Environment.TickCount - lastCastE) >= Config.Item("Cassiopeia.EDelayComboERange").GetValue<Slider>().Value)
-                            {
-                                if (IsPoisoned(targetE))
-                                {
-                                    E.CastOnUnit(targetE, true);
-                                    lastCastE = Environment.TickCount;
-                                    return;
-                                }
-                            }
-
-
-                        }
-                        #endregion
-
-                        switch (Config.Item("Cassiopeia.PoisonOrder").GetValue<StringList>().SelectedIndex)
-                        {
-                            case 0:
-                                {
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    #region Sort W combo mode
-                                    else if (useW && W.IsReady() && Player.Mana >= WMANA && !Q.IsReady())
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                            case 1:
-                                {
-
-                                    #region Sort W combo mode
-                                    if (useW && W.IsReady() && Player.Mana >= WMANA)
-                                    {
-
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastQ) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < W.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastQ) >= 1000)
-                                                    {
-                                                        WLogic();
-                                                        lastCastW = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < W.Range)
-                                                    {
-                                                        WLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-
-                                    }
-                                    #endregion
-
-                                    #region Sort Q combo mode
-                                    if (useQ && Q.IsReady() && !W.IsReady() && Player.Mana >= QMANA)
-                                    {
-                                        switch (Config.Item("Cassiopeia.PoisonStack").GetValue<StringList>().SelectedIndex)
-                                        {
-
-                                            case 0:
-                                                {
-                                                    if (Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() && Player.CountEnemiesInRange(1300) < 2 && Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && (target.HasBuffOfType(BuffType.Poison) || (Environment.TickCount - lastCastW) < 1000))
-                                                    {
-                                                        return;
-                                                    }
-                                                    else if ((!Config.Item("Cassiopeia.PoisonStack1VS1").GetValue<bool>() || Player.CountEnemiesInRange(1300) != 1) && Player.Distance(target) < Q.Range && !target.HasBuffOfType(BuffType.Poison) && (Environment.TickCount - lastCastW) >= 1000)
-                                                    {
-                                                        QLogic();
-                                                        lastCastQ = Environment.TickCount;
-                                                    }
-                                                    break;
-                                                }
-                                            case 1:
-                                                {
-                                                    if (Player.Distance(target) < Q.Range)
-                                                    {
-                                                        QLogic();
-                                                    }
-                                                    break;
-                                                }
-                                        }
-                                    }
-                                    #endregion
-
-                                    break;
-                                }
-
-                        }
                     }
                 }
-
             }
 
         }
@@ -2925,344 +2483,6 @@ namespace EloFactory_Cassiopeia
                 }
 
 
-                return;
-            }
-            return;
-        }
-        #endregion
-
-        #region QLogic VeryHigh
-        public static void QLogicVeryHigh()
-        {
-            var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
-
-            if (Player.CountEnemiesInRange(1300) > 1)
-            {
-                if (Player.CountAlliesInRange(1300) >= 1 + 1)
-                {
-                    if (getComboDamageNoUlt(target) > target.Health)
-                    {
-                        if (Player.HealthPercent >= 50)
-                        {
-                            if (Player.Distance(target) > E.Range && Player.Distance(target) < Q.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent < 50)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    if (getComboDamageNoUlt(target) < target.Health)
-                    {
-                        if (Player.HealthPercent <= target.HealthPercent)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent > target.HealthPercent)
-                        {
-                            if (Player.HealthPercent >= 50)
-                            {
-                                if (Player.Distance(target) > E.Range && Player.Distance(target) < Q.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            if (Player.HealthPercent < 50)
-                            {
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                }
-                if (Player.CountAlliesInRange(1300) == 0 + 1)
-                {
-                    if (getComboDamageNoUlt(target) > target.Health)
-                    {
-                        if (Player.HealthPercent >= 50)
-                        {
-                            if (Player.Distance(target) > E.Range && Player.Distance(target) < Q.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                        }
-                        if (Player.HealthPercent < 50)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    if (getComboDamageNoUlt(target) < target.Health)
-                    {
-                        if (Player.HealthPercent <= target.HealthPercent)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent > target.HealthPercent)
-                        {
-                            if (Player.HealthPercent >= 50)
-                            {
-                                if (Player.Distance(target) > E.Range && Player.Distance(target) < Q.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            if (Player.HealthPercent < 50)
-                            {
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                }
-                return;
-            }
-
-            if (Player.CountEnemiesInRange(1300) == 1)
-            {
-                if (Player.CountAlliesInRange(1300) >= 1 + 1)
-                {
-                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                    return;
-                }
-                if (Player.CountAlliesInRange(1300) == 0 + 1)
-                {
-                    Q.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                    return;
-                }
-                return;
-            }
-            return;
-        }
-        #endregion
-
-        #region WLogic VeryHigh
-        public static void WLogicVeryHigh()
-        {
-            var target = TargetSelector.GetTarget(W.Range, TargetSelector.DamageType.Magical);
-
-            if (Player.CountEnemiesInRange(1300) > 1)
-            {
-                if (Player.CountAlliesInRange(1300) >= 1 + 1)
-                {
-                    if (getComboDamageNoUlt(target) > target.Health)
-                    {
-                        if (Player.HealthPercent >= 50)
-                        {
-                            if (Player.Distance(target) > E.Range && Player.Distance(target) < W.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent < 50)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    if (getComboDamageNoUlt(target) < target.Health)
-                    {
-                        if (Player.HealthPercent <= target.HealthPercent)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent > target.HealthPercent)
-                        {
-                            if (Player.HealthPercent >= 50)
-                            {
-                                if (Player.Distance(target) > E.Range && Player.Distance(target) < W.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            if (Player.HealthPercent < 50)
-                            {
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                }
-                if (Player.CountAlliesInRange(1300) == 0 + 1)
-                {
-                    if (getComboDamageNoUlt(target) > target.Health)
-                    {
-                        if (Player.HealthPercent >= 50)
-                        {
-                            if (Player.Distance(target) > E.Range && Player.Distance(target) < W.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                        }
-                        if (Player.HealthPercent < 50)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    if (getComboDamageNoUlt(target) < target.Health)
-                    {
-                        if (Player.HealthPercent <= target.HealthPercent)
-                        {
-                            if (Player.Distance(target) <= E.Range)
-                            {
-                                W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                return;
-                            }
-                            return;
-                        }
-                        if (Player.HealthPercent > target.HealthPercent)
-                        {
-                            if (Player.HealthPercent >= 50)
-                            {
-                                if (Player.Distance(target) > E.Range && Player.Distance(target) < W.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            if (Player.HealthPercent < 50)
-                            {
-                                if (Player.Distance(target) <= E.Range)
-                                {
-                                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                                    return;
-                                }
-                                return;
-                            }
-                            return;
-                        }
-                        return;
-                    }
-                    return;
-                }
-                return;
-            }
-
-            if (Player.CountEnemiesInRange(1300) == 1)
-            {
-                if (Player.CountAlliesInRange(1300) >= 1 + 1)
-                {
-                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                    return;
-                }
-                if (Player.CountAlliesInRange(1300) == 0 + 1)
-                {
-                    W.CastIfHitchanceEquals(target, HitChance.VeryHigh, true);
-                    return;
-                }
                 return;
             }
             return;
