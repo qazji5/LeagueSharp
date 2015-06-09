@@ -39,6 +39,9 @@ namespace EloFactory_Ekko
         public static Items.Item CrystallineFlask = new Items.Item(2041, 0);
         public static Items.Item BiscuitofRejuvenation = new Items.Item(2010, 0);
 
+        public static Items.Item WoogletsWitchcap = new Items.Item(3090, 0);
+        public static Items.Item ZhonyasHourglass = new Items.Item(3157, 0);
+
         public static Menu Config;
 
         private static Obj_AI_Hero Player;
@@ -95,27 +98,26 @@ namespace EloFactory_Ekko
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ekko.UseIgniteKS", "KS With Ignite").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ekko.UseQKS", "KS With Q").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ekko.UseEKS", "KS With E").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ekko.UseRKS", "KS With R").SetValue(true));
-            Config.SubMenu("Combo").AddSubMenu(new Menu("R Settings", "R Settings"));
-            Config.SubMenu("Combo").SubMenu("R Settings").AddSubMenu(new Menu("R Combo", "R Combo"));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").AddItem(new MenuItem("Ekko.UseRCombo", "Use R In Combo").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").AddSubMenu(new Menu("R Combo Settings", "R Combo Settings"));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").SubMenu("R Combo Settings").AddItem(new MenuItem("Ekko.UseRBurstCombo", "Use Burst Mode R In Combo").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").SubMenu("R Combo Settings").AddItem(new MenuItem("Ekko.MiniEnemiesBurstR", "Minimum Enemies To Use Burst Mode R In Combo").SetValue(new Slider(2, 1, 5)));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").SubMenu("R Combo Settings").AddItem(new MenuItem("Ekko.MiniHPBurstR", "Minimum HP Percent To Use Burst Mode R In Combo").SetValue(new Slider(100, 0, 100)));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").SubMenu("R Combo Settings").AddItem(new MenuItem("Ekko.UseRSafeCombo", "Use Safe Mode R In Combo").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Combo").SubMenu("R Combo Settings").AddItem(new MenuItem("Ekko.MiniHPSafeR", "Minimum HP Percent To Use Safe Mode R In Combo").SetValue(new Slider(20, 0, 100)));
-            Config.SubMenu("Combo").SubMenu("R Settings").AddSubMenu(new Menu("R Auto", "R Auto"));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").AddItem(new MenuItem("Ekko.AutoR", "Use Auto R").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").AddSubMenu(new Menu("R Auto Settings", "R Auto Settings"));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.UseRBurstComboAuto", "Use Burst Mode R In Auto R").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MiniEnemiesBurstRAuto", "Minimum Enemies To Use Burst Mode R In Auto R").SetValue(new Slider(2, 1, 5)));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MiniHPBurstRAuto", "Minimum HP Percent To Use Burst Mode R In Auto R").SetValue(new Slider(100, 0, 100)));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.UseRSafeComboAuto", "Use Safe Mode R In Auto R").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("R Settings").SubMenu("R Auto").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MiniHPSafeRAuto", "Minimum HP Percent To Use Safe Mode R In Auto R").SetValue(new Slider(20, 0, 100)));
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Auto R", "Auto R"));
+            Config.SubMenu("Combo").SubMenu("Auto R").AddItem(new MenuItem("Ekko.RAuto", "Use Auto R").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Auto R").AddSubMenu(new Menu("R Auto Settings", "R Auto Settings"));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.UseBurstRComboAuto", "Use Burst Mode R In Auto R").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MinimumHPBurstRAuto", "Minimum HP Percent To Use Burst Mode R In Auto R").SetValue(new Slider(40, 0, 100)));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MinimumEnemiesBurstRAuto", "Minimum Enemies in R Range To Use Burst Mode R In Auto R").SetValue(new Slider(2, 1, 5)));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MinimumEnemiesDrangeRAuto", "Maximum Enemies in Dangerous Range Around R Swap Position (Enemies In R Range Included)").SetValue(new Slider(3, 1, 5)));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.UseSafeRComboAuto", "Use Safe Mode R In Auto R").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Auto R").SubMenu("R Auto Settings").AddItem(new MenuItem("Ekko.MinimumHPSafeRAuto", "Minimum HP Percent To Use Safe Mode R In Auto R").SetValue(new Slider(20, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ekko.UseQCombo", "Use Q In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ekko.UseWCombo", "Use W In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ekko.UseECombo", "Use E In Combo").SetValue(true));
+            Config.SubMenu("Combo").AddItem(new MenuItem("Ekko.UseRCombo", "Use R In Combo").SetValue(true));
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Items Activator", "Items Activator"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Zhonya's Hourglass", "Use Zhonya's Hourglass"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("Ekko.useZhonyasHourglass", "Use Zhonya's Hourglass").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("Ekko.MinimumHPtoZhonyasHourglass", "Minimum Health Percent To Use Zhonya's Hourglass").SetValue(new Slider(30, 0, 100)));
+            Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Wooglet's Witchcap", "Use Wooglet's Witchcap"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Wooglet's Witchcap").AddItem(new MenuItem("Ekko.useWoogletsWitchcap", "Use Wooglet's Witchcap").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Wooglet's Witchcap").AddItem(new MenuItem("Ekko.MinimumHPtoWoogletsWitchcap", "Minimum Health Percent To Use Wooglet's Witchcap").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ekko.AutoWOnStunTarget", "Auto Use W On Stunned Target").SetValue(true));
 
             Config.AddSubMenu(new Menu("Harass", "Harass"));
@@ -191,14 +193,21 @@ namespace EloFactory_Ekko
 
             #region Sort R Auto
 
-            if (Config.Item("Ekko.AutoR").GetValue<bool>() && R.IsReady())
+            if (Config.Item("Ekko.RAuto").GetValue<bool>() && R.IsReady())
             {
-                if (Config.Item("Ekko.UseRBurstComboAuto").GetValue<bool>() && Player.HealthPercent <= Config.Item("Ekko.MiniHPBurstRAuto").GetValue<Slider>().Value)
+                if (Config.Item("Ekko.UseBurstRComboAuto").GetValue<bool>() && Player.HealthPercent >= Config.Item("Ekko.MinimumHPBurstRAuto").GetValue<Slider>().Value)
                 {
-                    var EnemiesC = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400);
-                    if (EnemiesC >= Config.Item("Ekko.MiniEnemiesBurstRAuto").GetValue<Slider>().Value)
+                    var EnemiesCNoDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400 && getComboDamageUlt(x) > x.Health);
+                    var CountEnemiesIn800 = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 800);
+                    var CountAlliesIn1000 = HeroManager.Allies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1000);
+
+                    var target = TargetSelector.GetTarget(850, TargetSelector.DamageType.Magical);
+                    if (Player.CountEnemiesInRange(850) == 0 || getComboDamageNoUlt(target) < target.Health)
                     {
-                        R.Cast();
+                        if (EnemiesCNoDash >= Config.Item("Ekko.MinimumEnemiesBurstRAuto").GetValue<Slider>().Value && CountEnemiesIn800 <= Config.Item("Ekko.MinimumEnemiesDrangeRAuto").GetValue<Slider>().Value)
+                        {
+                            R.Cast();
+                        }
                     }
                 }
 
@@ -260,26 +269,76 @@ namespace EloFactory_Ekko
 
             if (Config.Item("Ekko.AutoR").GetValue<bool>() && R.IsReady())
             {
-                var SpellD = unit.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-                double HPLeft = ObjectManager.Player.Health - SpellD;
-                double HPPercent = (SpellD * 100) / ObjectManager.Player.Health;
-                if (Config.Item("Ekko.UseRSafeComboAuto").GetValue<bool>() && unit.IsEnemy && args.Target.IsMe
-                    && ((HPPercent >= Config.Item("Ekko.MiniHPSafeRAuto").GetValue<Slider>().Value && Player.HealthPercent <= Config.Item("Ekko.MiniHPSafeRAuto").GetValue<Slider>().Value) || Player.HealthPercent <= 10))
+                if (Config.Item("Ekko.UseSafeRComboAuto").GetValue<bool>() && Player.HealthPercent <= Config.Item("Ekko.MinimumHPSafeRAuto").GetValue<Slider>().Value)
                 {
-                    R.Cast();
+                    if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe)
+                    {
+                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        {
+                            R.Cast();
+                            return;
+                        }      
+                    }
                 }
+
             }
 
-            if (Config.Item("Ekko.UseRCombo").GetValue<bool>() && Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && R.IsReady())
+            if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe && Config.Item("Ekko.useZhonyasHourglass").GetValue<bool>() && ZhonyasHourglass.IsReady() && Player.HealthPercent <= Config.Item("Ekko.MinimumHPtoZhonyasHourglass").GetValue<Slider>().Value)
             {
-                var SpellD = unit.GetSpellDamage(ObjectManager.Player, args.SData.Name);
-                double HPLeft = ObjectManager.Player.Health - SpellD;
-                double HPPercent = (SpellD * 100) / ObjectManager.Player.Health;
-                if (Config.Item("Ekko.UseRSafeCombo").GetValue<bool>() && unit.IsEnemy && args.Target.IsMe
-                    && ((HPPercent >= Config.Item("Ekko.MiniHPSafeR").GetValue<Slider>().Value && Player.HealthPercent <= Config.Item("Ekko.MiniHPSafeR").GetValue<Slider>().Value) || Player.HealthPercent <= 10))
+                if (Player.CountEnemiesInRange(1300) > 1)
                 {
-                    R.Cast();
+                    if (Player.CountAlliesInRange(1300) >= 1 + 1)
+                    {
+                        ZhonyasHourglass.Cast();
+                        return;
+                    }
+                    if (Player.CountAlliesInRange(1300) == 0 + 1)
+                    {
+                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        {
+                            ZhonyasHourglass.Cast();
+                            return;
+                        }
+                    }
                 }
+                if (Player.CountEnemiesInRange(1300) == 1)
+                {
+                    if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                    {
+                        ZhonyasHourglass.Cast();
+                        return;
+                    }
+                }
+
+            }
+
+            if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe && Config.Item("Ekko.useWoogletsWitchcap").GetValue<bool>() && WoogletsWitchcap.IsReady() && Player.HealthPercent <= Config.Item("Ekko.MinimumHPtoWoogletsWitchcap").GetValue<Slider>().Value)
+            {
+                if (Player.CountEnemiesInRange(1300) > 1)
+                {
+                    if (Player.CountAlliesInRange(1300) >= 1 + 1)
+                    {
+                        WoogletsWitchcap.Cast();
+                        return;
+                    }
+                    if (Player.CountAlliesInRange(1300) == 0 + 1)
+                    {
+                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        {
+                            WoogletsWitchcap.Cast();
+                            return;
+                        }
+                    }
+                }
+                if (Player.CountEnemiesInRange(1300) == 1)
+                {
+                    if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                    {
+                        WoogletsWitchcap.Cast();
+                        return;
+                    }
+                }
+
             }
 
 
@@ -380,21 +439,16 @@ namespace EloFactory_Ekko
             var useE = Config.Item("Ekko.UseECombo").GetValue<bool>();
             var useR = Config.Item("Ekko.UseRCombo").GetValue<bool>();
 
+            #region Sort R combo mode
+            if (useR && R.IsReady())
+            {
+                RLogic();
+            }
+            #endregion
+
             var target = TargetSelector.GetTarget(Q.Range + R.Range, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
             {
-
-                #region Sort R combo mode
-                if (useR && R.IsReady())
-                {
-                    var EnemiesC = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400);
-                    if (Config.Item("Ekko.UseRBurstCombo").GetValue<bool>() && EnemiesC >= Config.Item("Ekko.MiniEnemiesBurstR").GetValue<Slider>().Value && Player.HealthPercent <= Config.Item("Ekko.MiniHPBurstR").GetValue<Slider>().Value)
-                    {
-                        R.Cast();
-                    }
-
-                }
-                #endregion
 
                 #region Sort W combo mode
                 if (useW && W.IsReady() && Player.Mana >= WMANA)
@@ -570,7 +624,6 @@ namespace EloFactory_Ekko
             var useIgniteKS = Config.Item("Ekko.UseIgniteKS").GetValue<bool>();
             var useQKS = Config.Item("Ekko.UseQKS").GetValue<bool>();
             var useEKS = Config.Item("Ekko.UseEKS").GetValue<bool>();
-            var useRKS = Config.Item("Ekko.UseRKS").GetValue<bool>();
 
             foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(target => !target.IsMe && target.Team != ObjectManager.Player.Team))
             {
@@ -584,6 +637,7 @@ namespace EloFactory_Ekko
                 if (useEKS && E.IsReady() && Player.Mana >= EMANA && target.Health < E.GetDamage(target) && Player.Distance(target) <= E.Range + 450 && !target.IsDead && target.IsValidTarget())
                 {
                     E.Cast(target.ServerPosition, true);
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                     return;
                 }
 
@@ -595,6 +649,7 @@ namespace EloFactory_Ekko
                 if (useQKS && useEKS && Q.IsReady() && E.IsReady() && Player.Mana >= QMANA + EMANA && target.Health < E.GetDamage(target) + Q.GetDamage(target) && Player.Distance(target) <= E.Range + 450 && !target.IsDead && target.IsValidTarget())
                 {
                     E.Cast(target.ServerPosition, true);
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                     return;
                 }
 
@@ -607,23 +662,14 @@ namespace EloFactory_Ekko
                 if (useEKS && useIgniteKS && Ignite.Slot != SpellSlot.Unknown && E.IsReady() && Player.Mana >= EMANA && target.Health < E.GetDamage(target) + Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) && Player.Distance(target) <= E.Range + 450 && !target.IsDead && target.IsValidTarget())
                 {
                     E.Cast(target.ServerPosition, true);
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                     return;
                 }
 
                 if (useQKS && useEKS && useIgniteKS && Ignite.Slot != SpellSlot.Unknown && Q.IsReady() && E.IsReady() && Player.Mana >= QMANA + EMANA && target.Health < Q.GetDamage(target) + E.GetDamage(target) + Player.GetSummonerSpellDamage(target, Damage.SummonerSpell.Ignite) && Player.Distance(target) <= E.Range + 450 && !target.IsDead && target.IsValidTarget())
                 {
                     E.Cast(target.ServerPosition, true);
-                    return;
-                }
-
-                if (useRKS && R.IsReady())
-                {
-                    var EnemiesRKSC = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400 && R.GetDamage(x) > x.Health);
-                    if (EnemiesRKSC >= 1)
-                    {
-                        R.Cast();
-                        return;
-                    }
+                    Player.IssueOrder(GameObjectOrder.AttackUnit, target);
                     return;
                 }
 
@@ -1061,6 +1107,91 @@ namespace EloFactory_Ekko
                 return;
             }
             return;
+        }
+        #endregion
+
+        #region RLogic
+        public static void RLogic()
+        {
+            var EnemiesCDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) > 400 && x.Distance(EkkoUlt.Position) < 800 && getComboDamageNoUlt(x) > x.Health);
+            var EnemiesCNoDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400 && getComboDamageUlt(x) > x.Health);
+            var CountEnemiesIn800 = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 800);
+            var CountAlliesIn1000 = HeroManager.Allies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1000);
+            var CountEnemiesIn1100 = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1100);
+            var CountAlliesIn1300 = HeroManager.Allies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1300);
+
+            var target = TargetSelector.GetTarget(850, TargetSelector.DamageType.Magical);
+            if (Player.CountEnemiesInRange(850) == 0 || getComboDamageNoUlt(target) < target.Health)
+            {
+                if (EnemiesCNoDash >= 1 && CountEnemiesIn800 <= 2)
+                {
+                    R.Cast();
+                }
+                if (EnemiesCNoDash >= 1 && CountEnemiesIn800 > 2 && CountAlliesIn1000 >= CountEnemiesIn800)
+                {
+                    R.Cast();
+                }
+
+                if (EnemiesCDash >= 1 && CountEnemiesIn1100 <= 2 && E.IsReady())
+                {
+                    R.Cast();
+                }
+                if (EnemiesCDash >= 1 && CountEnemiesIn1100 > 2 && CountAlliesIn1300 >= CountEnemiesIn1100 && E.IsReady())
+                {
+                    R.Cast();
+                }
+            }
+            
+        }
+        #endregion
+
+        #region Player Damage
+        public static float getComboDamageNoUlt(Obj_AI_Hero hero)
+        {
+            double damage = 0;
+            if (E.IsReady())
+            {
+                damage += Damage.GetSpellDamage(Player, hero, SpellSlot.E);
+            }
+            if (EMANA + QMANA >= Player.Mana)
+            {
+                damage += Damage.GetSpellDamage(Player, hero, SpellSlot.Q) * 4;
+            }
+            if (W.IsReady())
+            {
+                damage += (float)Damage.GetSpellDamage(Player, hero, SpellSlot.Q);
+            }
+            if (Player.Spellbook.CanUseSpell(Player.GetSpellSlot("summonerdot")) == SpellState.Ready)
+            {
+                damage += (float)Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
+            }
+            return (float)damage;
+        }
+
+        public static float getComboDamageUlt(Obj_AI_Hero hero)
+        {
+            double damage = 0;
+            if (R.IsReady())
+            {
+                damage += Damage.GetSpellDamage(Player, hero, SpellSlot.R);
+            }
+            if (E.IsReady())
+            {
+                damage += Damage.GetSpellDamage(Player, hero, SpellSlot.E);
+            }
+            if (EMANA + QMANA >= Player.Mana)
+            {
+                damage += Damage.GetSpellDamage(Player, hero, SpellSlot.Q) * 4;
+            }
+            if (W.IsReady())
+            {
+                damage += (float)Damage.GetSpellDamage(Player, hero, SpellSlot.Q);
+            }
+            if (Player.Spellbook.CanUseSpell(Player.GetSpellSlot("summonerdot")) == SpellState.Ready)
+            {
+                damage += (float)Player.GetSummonerSpellDamage(hero, Damage.SummonerSpell.Ignite);
+            }
+            return (float)damage;
         }
         #endregion
 
