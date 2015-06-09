@@ -38,6 +38,9 @@ namespace EloFactory_TwistedFate
         public static Items.Item CrystallineFlask = new Items.Item(2041, 0);
         public static Items.Item BiscuitofRejuvenation = new Items.Item(2010, 0);
 
+        public static Items.Item WoogletsWitchcap = new Items.Item(3090, 0);
+        public static Items.Item ZhonyasHourglass = new Items.Item(3157, 0);
+
         public static int CardTickCount;
         public static int RCardTickCount;
         public static int ManualCardGoldTickCount;
@@ -104,13 +107,21 @@ namespace EloFactory_TwistedFate
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("TwistedFate.UseIgniteKS", "KS With Ignite").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("TwistedFate.UseQKS", "KS With Q").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("TwistedFate.UseWKS", "KS With W").SetValue(true));
+            Config.SubMenu("Combo").AddSubMenu(new Menu("Items Activator", "Items Activator"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Zhonya's Hourglass", "Use Zhonya's Hourglass"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("TwistedFate.useZhonyasHourglass", "Use Zhonya's Hourglass").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("TwistedFate.MinimumHPtoZhonyasHourglass", "Minimum Health Percent To Use Zhonya's Hourglass").SetValue(new Slider(30, 0, 100)));
+            Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Wooglet's Witchcap", "Use Wooglet's Witchcap"));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Wooglet's Witchcap").AddItem(new MenuItem("TwistedFate.useWoogletsWitchcap", "Use Wooglet's Witchcap").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Wooglet's Witchcap").AddItem(new MenuItem("TwistedFate.MinimumHPtoWoogletsWitchcap", "Minimum Health Percent To Use Wooglet's Witchcap").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Combo").AddItem(new MenuItem("TwistedFate.UseQCombo", "Use Q In Combo").SetValue(true));
             Config.SubMenu("Combo").AddSubMenu(new Menu("Use W In Combo", "Use W In Combo"));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.UseWCombo", "Use W In Combo").SetValue(true));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.UseWComboOption", "Card Choice For Combo").SetValue(new StringList(new[] { "Intelligent Card Usage", "Gold Card", "Red Card", "Blue Card" })));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.WMiniManaCombo", "Minimum Mana To Use W In Combo").SetValue(new Slider(15, 0, 100)));
             Config.SubMenu("Combo").SubMenu("Use W In Combo").AddItem(new MenuItem("TwistedFate.UseWBlueCombo", "Use W Blue Card When Percent Mana Under Mana To Use W In Combo").SetValue(true));
- 
+            Config.SubMenu("Combo").AddItem(new MenuItem("TwistedFate.AutoQOnStunTarget", "Auto Use Q On Stunned Target").SetValue(true));
+
             Config.AddSubMenu(new Menu("Harass", "Harass"));
             Config.SubMenu("Harass").AddItem(new MenuItem("TwistedFate.UseQHarass", "Use Q In Harass").SetValue(true));
             Config.SubMenu("Harass").AddItem(new MenuItem("TwistedFate.QMiniManaHarass", "Minimum Mana To Use Q In Harass").SetValue(new Slider(35, 0, 100)));
@@ -189,64 +200,64 @@ namespace EloFactory_TwistedFate
             KillSteal();
 
             #region Manual Card Picking
-                
-                if (Config.Item("TwistedFate.GoldCardActive").GetValue<KeyBind>().Active)
+
+            if (Config.Item("TwistedFate.GoldCardActive").GetValue<KeyBind>().Active)
+            {
+                if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
                 {
-                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
-                    {
-                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                    }
-
-                    if (Environment.TickCount - ManualCardGoldTickCount < 250) return;
-                    ManualCardGoldTickCount = Environment.TickCount;
-
-                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
-                    {
-                        W.Cast();
-                    }
-                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
-                    {
-                        W.Cast();
-                    }
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
                 }
-                if (Config.Item("TwistedFate.RedCardActive").GetValue<KeyBind>().Active)
+
+                if (Environment.TickCount - ManualCardGoldTickCount < 250) return;
+                ManualCardGoldTickCount = Environment.TickCount;
+
+                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
                 {
-                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
-                    {
-                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                    }
-                    if (Environment.TickCount - ManualCardRedTickCount < 250) return;
-                    ManualCardRedTickCount = Environment.TickCount;
-
-                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
-                    {
-                        W.Cast();
-                    }
-                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
-                    {
-                        W.Cast();
-                    }
+                    W.Cast();
                 }
-                if (Config.Item("TwistedFate.BlueCardActive").GetValue<KeyBind>().Active)
+                else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
                 {
-                    if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
-                    {
-                        Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
-                    }
-                    if (Environment.TickCount - ManualCardBlueTickCount < 250) return;
-                    ManualCardBlueTickCount = Environment.TickCount;
-
-                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
-                    {
-                        W.Cast();
-                    }
-                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
-                    {
-                        W.Cast();
-                    }
+                    W.Cast();
                 }
-            
-            
+            }
+            if (Config.Item("TwistedFate.RedCardActive").GetValue<KeyBind>().Active)
+            {
+                if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                }
+                if (Environment.TickCount - ManualCardRedTickCount < 250) return;
+                ManualCardRedTickCount = Environment.TickCount;
+
+                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
+                {
+                    W.Cast();
+                }
+                else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                {
+                    W.Cast();
+                }
+            }
+            if (Config.Item("TwistedFate.BlueCardActive").GetValue<KeyBind>().Active)
+            {
+                if (Config.Item("TwistedFate.MoveOnCursorWhenPickACardKey").GetValue<bool>())
+                {
+                    Player.IssueOrder(GameObjectOrder.MoveTo, Game.CursorPos);
+                }
+                if (Environment.TickCount - ManualCardBlueTickCount < 250) return;
+                ManualCardBlueTickCount = Environment.TickCount;
+
+                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "PickACard")
+                {
+                    W.Cast();
+                }
+                else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
+                {
+                    W.Cast();
+                }
+            }
+
+
             #endregion
 
             if (Config.Item("TwistedFate.AutoGoldCardOnR").GetValue<bool>())
@@ -261,6 +272,15 @@ namespace EloFactory_TwistedFate
                 else if ((Player.HasBuff("Destiny Marker") || Player.HasBuff("Gate")) && ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
                 {
                     W.Cast();
+                }
+            }
+
+            if (Config.Item("TwistedFate.AutoQOnStunTarget").GetValue<bool>())
+            {
+                var target = TargetSelector.GetTarget(Q.Range, TargetSelector.DamageType.Magical);
+                if (target.IsValidTarget() && (target.HasBuffOfType(BuffType.Stun) || target.HasBuffOfType(BuffType.Snare)) && Player.Distance(target) < Q.Range)
+                {
+                    Q.CastIfHitchanceEquals(target, HitChance.High, true);
                 }
             }
 
@@ -297,6 +317,64 @@ namespace EloFactory_TwistedFate
         #region Interupt OnProcessSpellCast
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
+
+            if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe && Config.Item("TwistedFate.useZhonyasHourglass").GetValue<bool>() && ZhonyasHourglass.IsReady() && Player.HealthPercent <= Config.Item("TwistedFate.MinimumHPtoZhonyasHourglass").GetValue<Slider>().Value)
+            {
+                if (Player.CountEnemiesInRange(1300) > 1)
+                {
+                    if (Player.CountAlliesInRange(1300) >= 1 + 1)
+                    {
+                        ZhonyasHourglass.Cast();
+                        return;
+                    }
+                    if (Player.CountAlliesInRange(1300) == 0 + 1)
+                    {
+                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        {
+                            ZhonyasHourglass.Cast();
+                            return;
+                        }
+                    }
+                }
+                if (Player.CountEnemiesInRange(1300) == 1)
+                {
+                    if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                    {
+                        ZhonyasHourglass.Cast();
+                        return;
+                    }
+                }
+
+            }
+
+            if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe && Config.Item("TwistedFate.useWoogletsWitchcap").GetValue<bool>() && WoogletsWitchcap.IsReady() && Player.HealthPercent <= Config.Item("TwistedFate.MinimumHPtoWoogletsWitchcap").GetValue<Slider>().Value)
+            {
+                if (Player.CountEnemiesInRange(1300) > 1)
+                {
+                    if (Player.CountAlliesInRange(1300) >= 1 + 1)
+                    {
+                        WoogletsWitchcap.Cast();
+                        return;
+                    }
+                    if (Player.CountAlliesInRange(1300) == 0 + 1)
+                    {
+                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        {
+                            WoogletsWitchcap.Cast();
+                            return;
+                        }
+                    }
+                }
+                if (Player.CountEnemiesInRange(1300) == 1)
+                {
+                    if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                    {
+                        WoogletsWitchcap.Cast();
+                        return;
+                    }
+                }
+
+            }
 
             double ShouldUseOn = ShouldUse(args.SData.Name);
             if (unit.Team != ObjectManager.Player.Team && ShouldUseOn >= 0f && unit.IsValidTarget(Q.Range))
@@ -347,7 +425,7 @@ namespace EloFactory_TwistedFate
                                 {
                                     W.Cast();
                                 }
-                                
+
                             }
 
                             if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
@@ -424,7 +502,7 @@ namespace EloFactory_TwistedFate
 
             if (Player.HasBuff("Pick A Card")) Orbwalking.Attack = false;
             else Orbwalking.Attack = true;
-                
+
 
             var target = TargetSelector.GetTarget(800, TargetSelector.DamageType.Magical);
             if (target.IsValidTarget())
@@ -454,62 +532,62 @@ namespace EloFactory_TwistedFate
                     {
                         if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
                         {
-                            W.Cast();                  
+                            W.Cast();
                         }
                     }
                     else
 
-                    switch (Config.Item("TwistedFate.UseWComboOption").GetValue<StringList>().SelectedIndex)
-                    {
-                        case 0:
-                            {
-
-                                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                        switch (Config.Item("TwistedFate.UseWComboOption").GetValue<StringList>().SelectedIndex)
+                        {
+                            case 0:
                                 {
-                                    if (Player.CountEnemiesInRange(1200) >= 2 && target.CountAlliesInRange(200) >= 1)
+
+                                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                                    {
+                                        if (Player.CountEnemiesInRange(1200) >= 2 && target.CountAlliesInRange(200) >= 1)
+                                        {
+                                            W.Cast();
+                                        }
+                                    }
+
+                                    else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
                                     {
                                         W.Cast();
                                     }
+                                    break;
                                 }
 
-                                else if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
+                            case 1:
                                 {
-                                    W.Cast();   
+
+                                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
+                                    {
+                                        W.Cast();
+                                    }
+                                    break;
                                 }
-                                break;
-                            }
 
-                        case 1:
-                            {
-
-                                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "goldcardlock")
+                            case 2:
                                 {
-                                    W.Cast();
+
+                                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                                    {
+                                        W.Cast();
+                                    }
+                                    break;
                                 }
-                                break;
-                            }
 
-                        case 2:
-                            {
-
-                                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "redcardlock")
+                            case 3:
                                 {
-                                    W.Cast();
-                                }
-                                break;
-                            }
 
-                        case 3:
-                            {
-                                
-                                if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
-                                {
-                                    W.Cast();
+                                    if (ObjectManager.Player.Spellbook.GetSpell(SpellSlot.W).Name == "bluecardlock")
+                                    {
+                                        W.Cast();
+                                    }
+                                    break;
                                 }
-                                break;
-                            }
 
-                    }
+                        }
                 }
                 #endregion
 
