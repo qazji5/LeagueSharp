@@ -99,7 +99,7 @@ namespace EloFactory_Ryze
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ryze.UseIgniteKS", "KS With Ignite").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ryze.UseQKS", "KS With Q").SetValue(true));
             Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ryze.UseWKS", "KS With W").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ryze.UseEKS", "KS With E").SetValue(true));        
+            Config.SubMenu("Combo").SubMenu("KS Mode").AddItem(new MenuItem("Ryze.UseEKS", "KS With E").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseQCombo", "Use Q In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseWCombo", "Use W In Combo").SetValue(true));
             Config.SubMenu("Combo").AddItem(new MenuItem("Ryze.UseECombo", "Use E In Combo").SetValue(true));
@@ -178,7 +178,7 @@ namespace EloFactory_Ryze
             {
                 Utility.HpBarDamageIndicator.Enabled = eventArgs.GetNewValue<bool>();
             };
-            
+
             Config.AddToMainMenu();
 
             Game.OnUpdate += Game_OnGameUpdate;
@@ -266,7 +266,7 @@ namespace EloFactory_Ryze
 
         }
         #endregion
-        
+
         #region OnProcessSpellCast
         public static void Obj_AI_Base_OnProcessSpellCast(Obj_AI_Base unit, GameObjectProcessSpellCastEventArgs args)
         {
@@ -275,7 +275,7 @@ namespace EloFactory_Ryze
                 SeraphsEmbrace.Cast();
             }
         }
-        #endregion        
+        #endregion
 
         #region On Dash
         static void Unit_OnDash(Obj_AI_Base sender, Dash.DashItem args)
@@ -542,9 +542,10 @@ namespace EloFactory_Ryze
 
             if (useQ && Q.IsReady())
             {
-                foreach (var minion in allMinionsQ)
+                var allMinionsQr = MinionManager.GetMinions(Player.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                foreach (var minion in allMinionsQr)
                 {
-                    if (Player.GetAutoAttackDamage(MinionQ) < MinionQ.Health && Player.ManaPercent > MinManaQ && minion.Health < Q.GetDamage(minion))
+                    if (Player.GetAutoAttackDamage(minion) < minion.Health && Player.ManaPercent > MinManaQ && minion.Health < Q.GetDamage(minion))
                     {
                         Q.CastIfHitchanceEquals(minion, HitChance.VeryHigh, true);
                     }
@@ -598,9 +599,10 @@ namespace EloFactory_Ryze
 
             if (useQ && Q.IsReady())
             {
-                foreach (var minion in allMinionsQ)
+                var allMinionsQr = MinionManager.GetMinions(Player.AttackRange, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth);
+                foreach (var minion in allMinionsQr)
                 {
-                    if (Player.GetAutoAttackDamage(MinionQ) < MinionQ.Health && Player.ManaPercent > MinManaQ && minion.Health < Q.GetDamage(minion))
+                    if (Player.GetAutoAttackDamage(minion) < minion.Health && Player.ManaPercent > MinManaQ && minion.Health < Q.GetDamage(minion))
                     {
                         Q.CastIfHitchanceEquals(minion, HitChance.VeryHigh, true);
                     }
@@ -751,8 +753,8 @@ namespace EloFactory_Ryze
 
         }
         #endregion
-        
-                #region Player Damage
+
+        #region Player Damage
         public static float getComboDamage(Obj_AI_Hero target)
         {
             float damage = 0f;
