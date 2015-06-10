@@ -1081,8 +1081,8 @@ namespace EloFactory_Ekko
         #region RLogic
         public static void RLogic()
         {
-            var EnemiesCDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) > 400 && x.Distance(EkkoUlt.Position) < 800 && getComboDamageNoUlt(x) > x.Health);
-            var EnemiesCNoDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 400 && getComboDamageUlt(x) > x.Health);
+            var EnemiesCDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) > 385 && x.Distance(EkkoUlt.Position) < 800 && getComboDamageNoUlt(x) > x.Health);
+            var EnemiesCNoDash = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 385 && getComboDamageUlt(x) > x.Health);
             var CountEnemiesIn800 = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 800);
             var CountAlliesIn1000 = HeroManager.Allies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1000);
             var CountEnemiesIn1100 = HeroManager.Enemies.Count(x => x.IsValid<Obj_AI_Hero>() && x.IsValidTarget() && !x.IsDead && x.Distance(EkkoUlt.Position) < 1100);
