@@ -234,16 +234,6 @@ namespace EloFactory_Ekko
                 LaneClear();
             }
 
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.LastHit)
-            {
-                LastHit();
-            }
-
-            if (Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Mixed)
-            {
-                LastHit();
-            }
-
             if (Config.Item("Ekko.HarassActive").GetValue<KeyBind>().Active || Config.Item("Ekko.HarassActiveT").GetValue<KeyBind>().Active)
             {
                 Harass();
@@ -495,28 +485,6 @@ namespace EloFactory_Ekko
             if (useE && E.IsReady() && targetH.GetBuffCount("EkkoStacks") == 2 && Player.Distance(targetH) <= E.Range + 450 && Player.ManaPercent >= EMinMana)
             {
                 E.Cast(targetH.ServerPosition, true);
-            }
-
-        }
-        #endregion
-
-        #region LastHit
-        public static void LastHit()
-        {
-
-            var useQ = Config.Item("Ekko.UseQLastHit").GetValue<bool>();
-
-            var QMinMana = Config.Item("Ekko.QMiniManaLastHit").GetValue<Slider>().Value;
-
-            var allMinionsQ = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.Enemy);
-            var MinionQ = MinionManager.GetMinions(Q.Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth).FirstOrDefault();
-
-            foreach (var minion in allMinionsQ)
-            {
-                if (useQ && Q.IsReady() && minion.Health > Player.GetAutoAttackDamage(minion) && minion.Health < Q.GetDamage(minion) * 0.9)
-                {
-                    Q.CastIfHitchanceEquals(minion, HitChance.High, true);
-                }
             }
 
         }
