@@ -263,11 +263,30 @@ namespace EloFactory_Ekko
                 {
                     if ((unit.IsValid<Obj_AI_Hero>() || unit.IsValid<Obj_AI_Turret>()) && unit.IsEnemy && args.Target.IsMe)
                     {
-                        if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                        if (Player.CountEnemiesInRange(1300) > 1)
                         {
-                            R.Cast();
-                            return;
-                        }      
+                            if (Player.CountAlliesInRange(1300) >= 1 + 1)
+                            {
+                                R.Cast();
+                                return;
+                            }
+                            if (Player.CountAlliesInRange(1300) == 0 + 1)
+                            {
+                                if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                                {
+                                    R.Cast();
+                                    return;
+                                }
+                            }
+                        }
+                        if (Player.CountEnemiesInRange(1300) == 1)
+                        {
+                            if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
+                            {
+                                R.Cast();
+                                return;
+                            }
+                        }
                     }
                 }
 
