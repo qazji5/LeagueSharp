@@ -279,13 +279,10 @@ namespace EloFactory_Ekko
                                 }
                             }
                         }
-                        if (Player.CountEnemiesInRange(1300) == 1)
+                        else if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
                         {
-                            if (unit.GetSpellDamage(Player, args.SData.Name) >= Player.Health || (unit.GetAutoAttackDamage(Player) >= Player.Health && args.SData.IsAutoAttack()))
-                            {
-                                R.Cast();
-                                return;
-                            }
+                            R.Cast();
+                            return;
                         }
                     }
                 }
