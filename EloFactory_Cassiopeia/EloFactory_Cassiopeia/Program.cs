@@ -140,8 +140,8 @@ namespace EloFactory_Cassiopeia
             Config.SubMenu("Combo").SubMenu("Assisted R").AddItem(new MenuItem("Cassiopeia.AssistedREnemiesCount", "Minimum Enemies Hit To Assisted R").SetValue(new Slider(4, 1, 5)));
             Config.SubMenu("Combo").AddSubMenu(new Menu("Items Activator", "Items Activator"));
             Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Seraph's Embrace", "Use Seraph's Embrace"));
-            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Seraph's Embrace").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbrace", "Auto Seraph Usage").SetValue(true));
-            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Seraph's Embrace").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbraceMiniHP", "Minimum Health Percent To Use Auto Seraph").SetValue(new Slider(30, 0, 100)));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Seraph's Embrace").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbrace", "Use Seraph's Embrace").SetValue(true));
+            Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Seraph's Embrace").AddItem(new MenuItem("Cassiopeia.AutoSeraphsEmbraceMiniHP", "Minimum Health Percent To Use Seraph's Embrace").SetValue(new Slider(30, 0, 100)));
             Config.SubMenu("Combo").SubMenu("Items Activator").AddSubMenu(new Menu("Use Zhonya's Hourglass", "Use Zhonya's Hourglass"));
             Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("Cassiopeia.useZhonyasHourglass", "Use Zhonya's Hourglass").SetValue(true));
             Config.SubMenu("Combo").SubMenu("Items Activator").SubMenu("Use Zhonya's Hourglass").AddItem(new MenuItem("Cassiopeia.MinimumHPtoZhonyasHourglass", "Minimum Health Percent To Use Zhonya's Hourglass").SetValue(new Slider(30, 0, 100)));
